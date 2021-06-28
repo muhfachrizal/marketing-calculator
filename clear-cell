@@ -1,0 +1,16 @@
+function ClearCells() {
+  var sheet = SpreadsheetApp.getActive().getSheetByName("Calc");
+  sheet.getRange("E5").clearContent();
+  sheet.getRange("E7").clearContent();
+  sheet.getRange("E9").clearContent();
+  sheet.getRange("E11").clearContent();
+  sheet.getRange("E13").clearContent(); //5th line
+  sheet.getRange("E17").clearContent();
+  sheet.getRange("E19").clearContent();
+  sheet.getRange("E21").clearContent();
+  sheet.getRange("E23").clearContent();
+  sheet.getRange("E25").clearContent(); //10th line
+  sheet.getRange("E29").clearContent();
+  sheet.getRange("E31").clearContent();
+  sheet.getRange("E33").clearContent(); //13th line
+}
