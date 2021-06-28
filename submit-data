@@ -1,0 +1,137 @@
+function SubmitDataEmail() {
+  var ss        = SpreadsheetApp.getActiveSpreadsheet();
+  var GetData   = ss.getSheetByName("Calc"); //Form Sheet
+  var Final     = ss.getSheetByName("Final"); //Final Sheet
+      
+  //Input Values
+  var JobID = GetData.getRange("E7").getValue();
+  var ClientName = GetData.getRange("E9").getValue();
+  var JobDate = GetData.getRange("E11").getValue();
+  var RepName = GetData.getRange("E13").getValue();
+   
+  var TotalCam = GetData.getRange("E17").getValue();
+  var Subtotal = GetData.getRange("E21").getValue();
+  var OtherEq = GetData.getRange("E23").getValue();
+  var ServiceFee = GetData.getRange("E25").getValue();
+  
+  // Discount Calculation
+  
+  var TotalDisc = -(TotalCam - Subtotal);
+  var ClientDisc = 1 - (Subtotal/TotalCam);
+  var GrossDisc  = (-TotalDisc / (TotalCam + OtherEq));
+  var NetDisc    = (-TotalDisc / (TotalCam + OtherEq - (ServiceFee)));
+  var NetIncome  = Subtotal + OtherEq - ServiceFee;
+  
+  if (GetData.getRange("E23").isBlank()){
+    OtherEq = 0;
+    GetData.getRange("E23").setValue(OtherEq);
+  }
+
+  if (GetData.getRange("E25").isBlank()){
+    ServiceFee = 0;
+    GetData.getRange("E25").setValue(ServiceFee);
+  }
+
+  GetData.getRange("E5").setValue(NetIncome);
+  GetData.getRange("E19").setValue(TotalDisc);
+  GetData.getRange("E29").setValue(ClientDisc);
+  GetData.getRange("E31").setValue(GrossDisc);
+  GetData.getRange("E33").setValue(NetDisc);  
+
+  // Input Values
+  var values = [[GetData.getRange("E7").getValue(), //1
+               GetData.getRange("E9").getValue(),
+               GetData.getRange("E13").getValue(),
+               GetData.getRange("E17").getValue(),
+               GetData.getRange("E19").getValue(),
+               GetData.getRange("E21").getValue(), //6
+               GetData.getRange("E23").getValue(),
+               GetData.getRange("E25").getValue(),
+               GetData.getRange("E29").getValue(),
+               GetData.getRange("E31").getValue(),
+               GetData.getRange("E33").getValue(), //11
+               GetData.getRange("E5").getValue(),
+               GetData.getRange("E11").getValue()]];
+  
+  if(GetData.getRange("E11").isBlank() ){
+    SpreadsheetApp.getUi().alert("Please enter Job Date!");
+    }
+  
+  else{
+
+    if (!GetData.getRange("E7").isBlank() ){
+    
+      if (GrossDisc > 0.70999 || NetDisc > 0.70999){
+        
+        //Start Remark content
+        var ui = SpreadsheetApp.getUi();
+        var RemarkText = ui.prompt("Discount MORE than 70%", "Please enter the reason:", ui.ButtonSet.OK_CANCEL);
+        var button = RemarkText.getSelectedButton();
+        var text = RemarkText.getResponseText();
+        
+        var GrossDisc2 = GrossDisc*100 ; var GrossDisc3 = GrossDisc2.toFixed(2);
+        var NetDisc2 = NetDisc*100; var NetDisc3 = NetDisc2.toFixed(2);
+        
+        if (button == ui.Button.OK) { // User clicked "OK".
+          Final.getRange(Final.getLastRow()+1, 1, 1, 13).setValues(values);
+          Final.getRange(Final.getLastRow(), 13, 1, 1).setValue(text);
+          
+          // Fetch the email address
+          var emailAddress = "b_junaidi@yahoo.com" + "," + "contact.service@brandlink.co.th";
+          
+          // Send Alert Email.
+          var message = "Dear USER,\n\n"
+          + "A more-than-70% given discount is detected.\n"
+          + "Please kindly check https://YourLinkUrl.com for information.\n"
+          + "\nJob ID: " + JobID
+          + "\nClient Name: " + ClientName
+          + "\nDate: " + JobDate
+          + "\nSales Representative Name: " + SalesName
+          
+          + "\n\nNet Income: USD " + NetIncome
+          
+          + "\n\nThe Gross Discount *before Rent Out Payment* is " + GrossDisc3 + " percent."
+          + "\nThe Net Discount *after Rent Out Payment* is " + NetDisc3 + " percent."
+          + "\n\nReason for big discount is " + text +"."
+          
+          var subject = JobID + " | Client " + ClientName + " | Special Promotion Job Alert - Sales Rep: " + SalesName;
+          
+          MailApp.sendEmail(emailAddress, subject, message);
+          SpreadsheetApp.getUi().alert("Discount is MORE than 70%.\nThe user has been notified");
+        }
+        
+        else { // User clicked "No" or X in the title bar.
+          ui.alert("Please check the data.");
+          }
+        }
+      
+      else {
+        Final.getRange(Final.getLastRow()+1, 1, 1, 13).setValues(values);
+        //Final.getRange(Final.getLastRow(), 13, 1, 1).setValue(text);
+        SpreadsheetApp.getUi().alert("Data submitted to Final Sheet!");
+      }
+      
+  } // close mark for JobID not empty
+
+  else{
+      SpreadsheetApp.getUi().alert("Please enter Job Number!");
+      }
+  }
+}
+
+function ClearCells() {
+  var sheet = SpreadsheetApp.getActive().getSheetByName("Calc");
+  sheet.getRange("E5").clearContent();
+  sheet.getRange("E7").clearContent();
+  sheet.getRange("E9").clearContent();
+  sheet.getRange("E11").clearContent();
+  sheet.getRange("E13").clearContent(); //5
+  sheet.getRange("E17").clearContent();
+  sheet.getRange("E19").clearContent();
+  sheet.getRange("E21").clearContent();
+  sheet.getRange("E23").clearContent();
+  sheet.getRange("E25").clearContent(); //10
+  sheet.getRange("E29").clearContent();
+  sheet.getRange("E31").clearContent();
+  sheet.getRange("E33").clearContent(); //13
+}
